@@ -3,13 +3,16 @@ import './App.css';
 
 function TodoItem({todo, onToggle, onDelete}){
     return(
-        <li style = {{textDecoration: todo.done ? 'line-through' : 'none'}}>
-            <input
-                type = 'checkbox'
-                checked = {todo.done}
-                onChange = {onToggle}
-            />
-            {todo.text} <button className="delete-btn" onClick = {onDelete}>削除</button>
+        <li className="todo-item" style = {{textDecoration: todo.done ? 'line-through' : 'none'}}>
+            <div className="todo-content">
+                <input
+                    type = 'checkbox'
+                    checked = {todo.done}
+                    onChange = {onToggle}
+                />
+                {todo.text}
+            </div>
+            <button className="delete-btn" onClick = {onDelete}>削除</button>
         </li>
     );
 }
@@ -50,11 +53,13 @@ export default function App(){
     return (
         <div className="todo-app">
             <h1>Hello, React ToDo App!</h1>
-            <input
-                value={text} 
-                onChange={(e) => setText(e.target.value)} 
-            /> 
-            <button onClick={addTodo}>追加</button>
+            <div className="input-area">
+                <input
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                />
+                <button onClick={addTodo}>追加</button>
+            </div>
             <ul>
                 {todos.map((todo, index) => (
                     <TodoItem 
