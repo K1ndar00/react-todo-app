@@ -9,7 +9,7 @@ function TodoItem({todo, onToggle, onDelete}){
                 checked = {todo.done}
                 onChange = {onToggle}
             />
-            {todo.text} <button onClick = {onDelete}>削除</button>
+            {todo.text} <button className="delete-btn" onClick = {onDelete}>削除</button>
         </li>
     );
 }
@@ -48,7 +48,7 @@ export default function App(){
     }
 
     return (
-        <div>
+        <div className="todo-app">
             <h1>Hello, React ToDo App!</h1>
             <input
                 value={text} 
