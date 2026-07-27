@@ -1,7 +1,7 @@
 h1 {
-    color : #333 ;
-    font-size : 28px ;
-    margin-bottom: 24px ;
+    color : #333 ; /* 見出しの色 */
+    font-size : 28px ; /* 見出しのフォントサイズ */
+    margin-bottom: 24px ; /* 見出しと入力エリアの間隔 */
 }
 
 .todo-app {
@@ -76,3 +76,12 @@ button:hover {
     background-color: #d32f2f;
 }
 
+.filter-btns button {
+    background-color: #ccc;
+    color: #333;
+}
+
+.filter-btns button.active {
+    background-color: #4CAF50;
+    color: white;
+}
