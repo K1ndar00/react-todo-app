@@ -84,12 +84,22 @@ button:hover {
     background-color: #d32f2f;
 }
 
-.filter-btns button {
-    background-color: #ccc;
-    color: #333;
+.filter-btns {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
 }
 
-.filter-btns button.active {
-    background-color: #4CAF50;
-    color: white;
+.filter-select{
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.filter-select:hover {
+    background-color: #f0f0f0;
 }

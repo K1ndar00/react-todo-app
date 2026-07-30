@@ -15,7 +15,7 @@ function TodoItem({todo, onToggle, onDelete, onTagChange, tagOptions}) {
                 <select 
                 value =  {todo.tag} 
                 className="tag-label"
-                onChange = {(e) => onTagChange(e.target.value)}> //e.target.valueってどんな意味？
+                onChange = {(e) => onTagChange(e.target.value)}> 
                     {tagOptions.map((tag) => (
                         <option key={tag} value={tag}>{tag}</option>
                     ))}
@@ -27,10 +27,16 @@ function TodoItem({todo, onToggle, onDelete, onTagChange, tagOptions}) {
 }
 
 export default function App(){
+    //----------Selectの選択肢配列---------
     const tagOptions = ['work', 'study', 'exercise', 'hobby']; // タグの選択肢を定義
+    const filterOptions = ['all', 'active', 'completed']; // フィルターの選択肢を定義
+    const tagFilterOptions = ['all', ...tagOptions]; // フィルターのタグの選択肢を定義
 
-    // useStateを使って、textとtodosの状態を管理
+    // ---------useStateの一覧---------
     const [text, setText] = useState('');
+    const [selectedTag, setSelectedTag] = useState(tagOptions[0]); // タスク追加欄のタグの状態を管理
+    const [filteredTag, setFilteredTag] = useState(tagFilterOptions[0]); // フィルターされたタグの状態を管理
+    const [filter, setFilter] = useState('all'); // フィルターの状態を管理
     const [todos, setTodos] = useState(() => {
         const saved = localStorage.getItem('todos'); // ローカルストレージから保存されたtodosを取得
         if (!saved) {
@@ -48,20 +54,22 @@ export default function App(){
             return updatedTodo;
         });
     });
-    const [filter, setFilter] = useState('all'); // フィルターの状態を管理
+    
+    //----------フィルター処理---------
     const filteredTodos = todos.filter((todo) => {
-        if (filter === 'active') return !todo.done;
-        if (filter === 'completed') return todo.done;
+        if (filter === 'active' && todo.done) return false;
+        if (filter === 'completed' && !todo.done) return false;
+        if (filteredTag !== 'all' && todo.tag !== filteredTag) return false;
         return true;
     });
 
-    const [selectedTag, setSelectedTag] = useState(tagOptions[0]); // タグの状態を管理
-
+    //----------useEffectの一覧---------
     // todosが変更されるたびにローカルストレージに保存する
     useEffect(() =>{
         localStorage.setItem('todos', JSON.stringify(todos));
     }, [todos]);
 
+    //-----------関数の一覧-------------
     //追加ボタンを押したときに呼ばれる関数
     function addTodo() {
         setTodos([...todos, {id: Date.now(), text: text, done: false, tag: selectedTag}]); // 新しいtodoを追加
@@ -92,6 +100,10 @@ export default function App(){
         setTodos(newTodos);
     }
 
+    function updateFilter(newFilter) {
+        setFilter(newFilter);
+    }
+
     //削除ボタンを押したときに呼ばれる関数
     function deleteTodo(id){
         const newTodos = todos.filter((todo) => todo.id !== id); // クリックされたtodoのIDと一致しないものだけを残す
@@ -115,28 +127,26 @@ export default function App(){
                 </select>
                 <button onClick={addTodo}>追加</button>
             </div>
-
+            
             <div className="filter-btns">
-                <button 
-                className={filter === 'all' ? 'active' : ''}
-                onClick={() => setFilter('all')}
-                >
-                すべて
-                </button>
-
-                <button 
-                className = {filter === 'active' ? 'active' : ''}
-                onClick={() => setFilter('active')}
-                >
-                未完了
-                </button>
-
-                <button 
-                className = {filter === 'completed' ? 'active' : ''}
-                onClick={() => setFilter('completed')}
-                >
-                完了済み
-                </button>
+                <select 
+                className="filter-select"   
+                value={filter} onChange={(e) => updateFilter(e.target.value)}>
+                    {filterOptions.map((option) => (
+                        <option key={option} value={option}>
+                            {option === 'all' ? 'すべて' : option === 'active' ? '未完了' : '完了済み'}
+                        </option>
+                    ))}
+                </select>
+                <select 
+                className="filter-select"   
+                value={filteredTag} onChange={(e) => setFilteredTag(e.target.value)}>
+                    {tagFilterOptions.map((tag) => (
+                        <option key={tag} value={tag}>
+                            {tag === 'all' ? 'すべてのタグ' : tag}
+                        </option>
+                    ))}
+                </select>
             </div>
 
             <ul>
