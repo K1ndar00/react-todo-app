@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import './App.css';
 
 // TodoItemコンポーネントを定義
-function TodoItem({todo, onToggle, onDelete}){
+function TodoItem({todo, onToggle, onDelete, onTagChange, tagOptions}) {
     return(
         <li className="todo-item" style = {{textDecoration: todo.done ? 'line-through' : 'none'}}>
             <div className="todo-content">
@@ -12,6 +12,14 @@ function TodoItem({todo, onToggle, onDelete}){
                     onChange = {onToggle}
                 />
                 {todo.text}
+                <select 
+                value =  {todo.tag} 
+                className="tag-label"
+                onChange = {(e) => onTagChange(e.target.value)}> //e.target.valueってどんな意味？
+                    {tagOptions.map((tag) => (
+                        <option key={tag} value={tag}>{tag}</option>
+                    ))}
+                </select> 
             </div>
             <button className="delete-btn" onClick = {onDelete}>削除</button>
         </li>
@@ -19,6 +27,8 @@ function TodoItem({todo, onToggle, onDelete}){
 }
 
 export default function App(){
+    const tagOptions = ['work', 'study', 'exercise', 'hobby']; // タグの選択肢を定義
+
     // useStateを使って、textとtodosの状態を管理
     const [text, setText] = useState('');
     const [todos, setTodos] = useState(() => {
@@ -28,10 +38,14 @@ export default function App(){
         }
         const parsedTodos = JSON.parse(saved);
         return parsedTodos.map((todo) => {
-            if (todo.id === undefined) {
-                return { ...todo, id: Date.now() + Math.random() }; // idがない場合は新しいidを生成
+            let updatedTodo = todo;
+            if (updatedTodo.id === undefined) {
+                updatedTodo = { ...updatedTodo, id: Date.now() + Math.random() }; // idがない場合は新しいidを生成
             }
-            return todo;
+            if (updatedTodo.tag === undefined) {
+                updatedTodo = { ...updatedTodo, tag: tagOptions[0] }; // tagがない場合は最初のタグを設定
+            }
+            return updatedTodo;
         });
     });
     const [filter, setFilter] = useState('all'); // フィルターの状態を管理
@@ -41,6 +55,8 @@ export default function App(){
         return true;
     });
 
+    const [selectedTag, setSelectedTag] = useState(tagOptions[0]); // タグの状態を管理
+
     // todosが変更されるたびにローカルストレージに保存する
     useEffect(() =>{
         localStorage.setItem('todos', JSON.stringify(todos));
@@ -48,7 +64,7 @@ export default function App(){
 
     //追加ボタンを押したときに呼ばれる関数
     function addTodo() {
-        setTodos([...todos, {id: Date.now(), text: text, done: false}]); // 新しいtodoを追加
+        setTodos([...todos, {id: Date.now(), text: text, done: false, tag: selectedTag}]); // 新しいtodoを追加
         setText(''); // 入力欄を空にする
         //console.log(todos); // 実験的に追加
     }
@@ -58,6 +74,17 @@ export default function App(){
         const newTodos = todos.map((todo) => {
             if (todo.id === id) {  // クリックされたtodoのIDと一致する場合
                 return {...todo, done: !todo.done}; // ここでdoneの値を反転させる
+            } else { // それ以外のtodoはそのまま返す
+                return todo;
+            }
+        });
+        setTodos(newTodos);
+    }
+
+    function updateTag(id, newTag) {
+        const newTodos = todos.map((todo) => {
+            if (todo.id === id) {  // クリックされたtodoのIDと一致する場合
+                return {...todo, tag: newTag}; // ここでdoneの値を反転させる
             } else { // それ以外のtodoはそのまま返す
                 return todo;
             }
@@ -79,6 +106,13 @@ export default function App(){
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                 />
+                <select value={selectedTag} onChange = {(e) => setSelectedTag(e.target.value)}>
+                    {tagOptions.map((tag) => (
+                        <option key={tag} value={tag}>
+                            {tag}
+                        </option>
+                    ))}
+                </select>
                 <button onClick={addTodo}>追加</button>
             </div>
 
@@ -112,6 +146,8 @@ export default function App(){
                         todo = {todo} 
                         onToggle = {() => toggleDone(todo.id)}
                         onDelete = {() => deleteTodo(todo.id)}
+                        onTagChange = {(newTag) => updateTag(todo.id, newTag)}
+                        tagOptions = {tagOptions}
                     />
                 ))}
             </ul>
