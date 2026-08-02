@@ -4,14 +4,18 @@ import './App.css';
 // TodoItemコンポーネントを定義
 function TodoItem({todo, onToggle, onDelete, onTagChange, tagOptions}) {
     return(
-        <li className="todo-item" style = {{textDecoration: todo.done ? 'line-through' : 'none'}}>
-            <div className="todo-content">
+        <li className="todo-item">
+            <div className="todo-info">
                 <input
                     type = 'checkbox'
                     checked = {todo.done}
                     onChange = {onToggle}
                 />
-                {todo.text}
+                <span style = {{textDecoration: todo.done ? 'line-through' : 'none'}}>
+                    {todo.text}
+                </span>
+            </div>
+            <div className="todo-actions">
                 <select 
                 value =  {todo.tag} 
                 className="tag-label"
@@ -20,8 +24,8 @@ function TodoItem({todo, onToggle, onDelete, onTagChange, tagOptions}) {
                         <option key={tag} value={tag}>{tag}</option>
                     ))}
                 </select> 
+                <button className="delete-btn" onClick = {onDelete}>削除</button>
             </div>
-            <button className="delete-btn" onClick = {onDelete}>削除</button>
         </li>
     );
 }
@@ -113,12 +117,17 @@ export default function App(){
     return (
         <div className="todo-app">
             <h1>Hello, React ToDo App!</h1>
+
+            {/* ToDo追加欄 */}
             <div className="input-area">
                 <input
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                 />
-                <select value={selectedTag} onChange = {(e) => setSelectedTag(e.target.value)}>
+                <select 
+                className="filter-select" 
+                value={selectedTag} 
+                onChange = {(e) => setSelectedTag(e.target.value)}>
                     {tagOptions.map((tag) => (
                         <option key={tag} value={tag}>
                             {tag}
@@ -128,6 +137,7 @@ export default function App(){
                 <button onClick={addTodo}>追加</button>
             </div>
             
+            {/* フィルター選択欄 */}
             <div className="filter-btns">
                 <select 
                 className="filter-select"   
@@ -149,6 +159,7 @@ export default function App(){
                 </select>
             </div>
 
+            {/* ToDoリスト表示 */}
             <ul>
                 {filteredTodos.map((todo) => (
                     <TodoItem 
