@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import './App.css';
 
 // TodoItemコンポーネントを定義
-function TodoItem({todo, onToggle, onDelete, onTagChange, tagOptions}) {
+function TodoItem({todo, onToggle, onDelete, onTagChange, tagOptions, onOpenMemo}) {
     return(
         <li className="todo-item">
             <div className="todo-info">
@@ -24,10 +24,40 @@ function TodoItem({todo, onToggle, onDelete, onTagChange, tagOptions}) {
                         <option key={tag} value={tag}>{tag}</option>
                     ))}
                 </select> 
+                <button className="memo-btn" onClick = {onOpenMemo}>メモ</button>
                 <button className="delete-btn" onClick = {onDelete}>削除</button>
             </div>
         </li>
     );
+}
+
+//MemoPageコンポーネントを定義
+function MemoPage({todo, onBack, onSaveMemo}){
+    const [memoText, setMemoText] = useState(todo.memo || ''); // メモの状態を管理
+
+    function handleSave() {
+        onSaveMemo(memoText); // メモを保存する関数を呼び出す
+        onBack(); // メイン画面に戻る
+    }
+
+    return(
+        <div className='memo-page'>
+            <div className='memo-header'>
+                <h2>{todo.text}</h2>
+                <button 
+                className='back-btn'
+                onClick={onBack}>
+                    戻る
+                </button>
+            </div>
+            <textarea
+                value = {memoText}
+                onChange = {(e) => setMemoText(e.target.value)}
+                rows = {10}
+            />
+            <button onClick={handleSave}>保存</button>
+        </div>
+    )
 }
 
 export default function App(){
@@ -41,6 +71,7 @@ export default function App(){
     const [selectedTag, setSelectedTag] = useState(tagOptions[0]); // タスク追加欄のタグの状態を管理
     const [filteredTag, setFilteredTag] = useState(tagFilterOptions[0]); // フィルターされたタグの状態を管理
     const [filter, setFilter] = useState('all'); // フィルターの状態を管理
+    const [openMemoId, setOpenMemoId] = useState(null); // メモページが開かれているかどうかを管理
     const [todos, setTodos] = useState(() => {
         const saved = localStorage.getItem('todos'); // ローカルストレージから保存されたtodosを取得
         if (!saved) {
@@ -114,64 +145,86 @@ export default function App(){
         setTodos(newTodos);
     }
 
+    // メモページを開く関数
+    function updateMemo(id, newMemo){
+        const newTodos = todos.map((todo) =>{
+            if (todo.id ===id) {
+                return {...todo, memo: newMemo};
+            } else {
+                return todo;
+            }
+        })
+        setTodos(newTodos);
+    }
+
     return (
         <div className="todo-app">
-            <h1>Hello, React ToDo App!</h1>
+            {openMemoId === null ? (
+                <>
+                    <h1>Hello, React ToDo App!</h1>
+                    {/* ToDo追加欄 */}
+                    <div className="input-area">
+                        <input
+                            value={text}
+                            onChange={(e) => setText(e.target.value)}
+                        />
+                        <select 
+                        className="filter-select" 
+                        value={selectedTag} 
+                        onChange = {(e) => setSelectedTag(e.target.value)}>
+                            {tagOptions.map((tag) => (
+                                <option key={tag} value={tag}>
+                                    {tag}
+                                </option>
+                            ))}
+                        </select>
+                        <button onClick={addTodo}>追加</button>
+                    </div>
+                    
+                    {/* フィルター選択欄 */}
+                    <div className="filter-btns">
+                        <select 
+                        className="filter-select"   
+                        value={filter} onChange={(e) => updateFilter(e.target.value)}>
+                            {filterOptions.map((option) => (
+                                <option key={option} value={option}>
+                                    {option === 'all' ? 'すべて' : option === 'active' ? '未完了' : '完了済み'}
+                                </option>
+                            ))}
+                        </select>
+                        <select 
+                        className="filter-select"   
+                        value={filteredTag} onChange={(e) => setFilteredTag(e.target.value)}>
+                            {tagFilterOptions.map((tag) => (
+                                <option key={tag} value={tag}>
+                                    {tag === 'all' ? 'すべてのタグ' : tag}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-            {/* ToDo追加欄 */}
-            <div className="input-area">
-                <input
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
+                    {/* ToDoリスト表示 */}
+                    <ul>
+                        {filteredTodos.map((todo) => (
+                            <TodoItem 
+                                key = {todo.id}
+                                todo = {todo} 
+                                onToggle = {() => toggleDone(todo.id)}
+                                onDelete = {() => deleteTodo(todo.id)}
+                                onTagChange = {(newTag) => updateTag(todo.id, newTag)}
+                                tagOptions = {tagOptions}
+                                onOpenMemo = {() => setOpenMemoId(todo.id)}
+                            />
+                        ))}
+                    </ul>
+                </>
+            ) : (
+                <MemoPage 
+                    todo = {todos.find((todo) => todo.id === openMemoId)}
+                    onBack = {() => setOpenMemoId(null)}
+                    onSaveMemo = {(newMemo) => updateMemo(openMemoId, newMemo)}
                 />
-                <select 
-                className="filter-select" 
-                value={selectedTag} 
-                onChange = {(e) => setSelectedTag(e.target.value)}>
-                    {tagOptions.map((tag) => (
-                        <option key={tag} value={tag}>
-                            {tag}
-                        </option>
-                    ))}
-                </select>
-                <button onClick={addTodo}>追加</button>
-            </div>
-            
-            {/* フィルター選択欄 */}
-            <div className="filter-btns">
-                <select 
-                className="filter-select"   
-                value={filter} onChange={(e) => updateFilter(e.target.value)}>
-                    {filterOptions.map((option) => (
-                        <option key={option} value={option}>
-                            {option === 'all' ? 'すべて' : option === 'active' ? '未完了' : '完了済み'}
-                        </option>
-                    ))}
-                </select>
-                <select 
-                className="filter-select"   
-                value={filteredTag} onChange={(e) => setFilteredTag(e.target.value)}>
-                    {tagFilterOptions.map((tag) => (
-                        <option key={tag} value={tag}>
-                            {tag === 'all' ? 'すべてのタグ' : tag}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            {/* ToDoリスト表示 */}
-            <ul>
-                {filteredTodos.map((todo) => (
-                    <TodoItem 
-                        key = {todo.id}
-                        todo = {todo} 
-                        onToggle = {() => toggleDone(todo.id)}
-                        onDelete = {() => deleteTodo(todo.id)}
-                        onTagChange = {(newTag) => updateTag(todo.id, newTag)}
-                        tagOptions = {tagOptions}
-                    />
-                ))}
-            </ul>
+            )}
         </div>
     );
 }

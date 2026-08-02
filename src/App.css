@@ -109,3 +109,45 @@ button:hover {
 .filter-select:hover {
     background-color: #f0f0f0;
 }
+
+.memo-page {
+    display: flex;
+    flex-direction: column;
+}
+
+.memo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.memo-header h2 {
+    margin: 10px 0;
+    color: #333;
+}
+
+.memo-btn {
+    padding: 2px 8px;
+    font-size: 12px;
+}
+
+.back-btn {
+    background-color: #999;
+}
+
+.back-btn:hover {
+    background-color: #777;
+}
+
+.memo-page textarea {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: sans-serif;
+    resize: vertical;
+    box-sizing: border-box;
+    margin-bottom: 16px;
+}
